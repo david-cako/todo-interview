@@ -15,7 +15,7 @@ function App() {
   useEffect(() => {
     apiClient
       .getToDos()
-      .then((fetchedTodos) => setTodos(fetchedTodos))
+      .then((fetchedTodos) => { setTodos(fetchedTodos) })
       .catch(console.error);
   }, []);
 
@@ -37,7 +37,9 @@ function App() {
     setTodos(newTodos);
   }
 
-  const onMove = (todo: ToDo, { y }: { y: number }) => {
+  const onMove = async (todo: ToDo, { y }: { y: number }) => {
+    setIsDragging(false);
+
     let newIdx;
 
     const items = document.querySelectorAll(".todo-item");
@@ -61,11 +63,8 @@ function App() {
     }
 
     if (newIdx !== undefined) {
-      const newTodos = todos.filter(item => item.id !== todo.id);
-
-      newTodos.splice(newIdx, 0, todo);
-
-      setTodos(newTodos);
+      const updatedTodos = await apiClient.updateIndex(todo.id, newIdx)
+      setTodos(updatedTodos);
     }
   }
 
@@ -86,7 +85,6 @@ function App() {
           key={todo.id}
           onMarkDoneClick={onMarkDoneClick}
           onDragStart={() => setIsDragging(true)}
-          onDragEnd={() => setIsDragging(false)}
           onMove={onMove}
         />
       ))}
