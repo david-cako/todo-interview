@@ -46,7 +46,10 @@ function App() {
       />
 
       {todos.map((todo) => (
-        <TodoItem todo={todo} onMarkDoneClick={onMarkDoneClick} />
+        <TodoItem todo={todo}
+          key={todo.id}
+          onMarkDoneClick={onMarkDoneClick}
+        />
       ))}
     </>
   );

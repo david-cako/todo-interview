@@ -7,7 +7,7 @@ interface TodoItemProps {
 
 export default function TodoItem({ todo, onMarkDoneClick }: TodoItemProps) {
     return (
-        <div key={todo.id} className="todo-item">
+        <div className="todo-item">
             <label
                 style={{ textDecoration: todo.done ? 'line-through' : 'none' }}
             >
