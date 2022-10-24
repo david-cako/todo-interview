@@ -1,6 +1,6 @@
 // Api for interacting with the server
 export interface ToDo {
-  id: string;
+  id: number;
   label: string;
   done: boolean;
 }
@@ -34,7 +34,7 @@ export class ApiClient {
    * Toggles the 'done' state of a todo
    * @param id The ID of the todo to toggle
    */
-  async toggleDone(id: string): Promise<ToDo> {
+  async toggleDone(id: number): Promise<ToDo> {
     const response = await fetch(`${url}/${id}`, { method: 'PUT', headers });
     return await response.json();
   }
