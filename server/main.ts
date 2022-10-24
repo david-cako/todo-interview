@@ -12,7 +12,7 @@ app.use(express.json());
 
 // Route to get all todos
 app.get('/todo', async (_: Request, res: Response) => {
-  const result = await client.query('SELECT * from todo');
+  const result = await client.query('SELECT * from todo ORDER BY item_index ASC');
   res.send(result.rows);
 });
 
@@ -32,6 +32,33 @@ app.put('/todo/:id', async (req: Request, res: Response) => {
     [req.params.id]
   );
   res.send(result.rows[0]);
+});
+
+// Route to update the sort index a todo
+app.put('/todo/index/:id', async (req: Request, res: Response) => {
+  try {
+    await client.query('BEGIN');
+    let result = await client.query('SELECT * from todo');
+
+    // find existing row
+    const itemIdx = result.rows.findIndex(item => item.id === parseInt(req.params.id));
+
+    // splice and reorder
+    const [row] = result.rows.splice(itemIdx, 1);
+
+    result.rows.splice(req.body.index, 0, row);
+
+    const query = result.rows.map((r, idx) => `UPDATE todo SET item_index = ${idx} WHERE id = ${r.id};`);
+
+    await client.query(
+      query.join("")
+    );
+    await client.query('COMMIT');
+    res.send(result.rows);
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  }
 });
 
 app.listen(8080, async () => {

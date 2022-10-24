@@ -3,6 +3,7 @@ export interface ToDo {
   id: number;
   label: string;
   done: boolean;
+  item_index: number;
 }
 
 const url = 'http://localhost:8080/todo';
@@ -36,6 +37,19 @@ export class ApiClient {
    */
   async toggleDone(id: number): Promise<ToDo> {
     const response = await fetch(`${url}/${id}`, { method: 'PUT', headers });
+    return await response.json();
+  }
+
+  /**
+  * Updates index of todo item
+  * @param id The ID of the todo to update
+  */
+  async updateIndex(id: number, index: number): Promise<ToDo[]> {
+    const response = await fetch(`${url}/index/${id}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ index })
+    });
     return await response.json();
   }
 }
