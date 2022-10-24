@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ApiClient, ToDo } from './ApiClient';
 import './App.css';
+import AddTodo from './components/AddTodo';
+
+import TodoItem from './components/TodoItem';
 
 const apiClient = new ApiClient();
 
@@ -20,7 +23,7 @@ function App() {
     setTodos([...todos, newTodo]);
   }
 
-  const onMarkDoneClick = async (todoId: string) => {
+  const onMarkDoneClick = async (todoId: number) => {
     const updatedTodo = await apiClient.toggleDone(todoId);
     const newTodos = [...todos]
 
@@ -37,26 +40,13 @@ function App() {
     <>
       <h1>To Do List</h1>
 
-      <div className="add-todo-container">
-        <input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder="Buy groceries"
-        />
-        <button onClick={onAddItemClick}>Add ToDo</button>
-      </div>
+      <AddTodo label={label}
+        onLabelChange={setLabel}
+        onAddItemClick={onAddItemClick}
+      />
 
       {todos.map((todo) => (
-        <div key={todo.id} className="todo-item">
-          <label
-            style={{ textDecoration: todo.done ? 'line-through' : 'none' }}
-          >
-            {todo.label}
-          </label>
-          <button onClick={() => onMarkDoneClick(todo.id)}>
-            Mark {todo.done ? 'Undone' : 'Done'}
-          </button>
-        </div>
+        <TodoItem todo={todo} onMarkDoneClick={onMarkDoneClick} />
       ))}
     </>
   );
