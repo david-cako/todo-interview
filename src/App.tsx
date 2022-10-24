@@ -13,7 +13,25 @@ function App() {
       .getToDos()
       .then((fetchedTodos) => setTodos(fetchedTodos))
       .catch(console.error);
-  }, [setTodos]);
+  }, []);
+
+  const onAddItemClick = async () => {
+    const newTodo = await apiClient.addTodo(label);
+    setTodos([...todos, newTodo]);
+  }
+
+  const onMarkDoneClick = async (todoId: string) => {
+    const updatedTodo = await apiClient.toggleDone(todoId);
+    const newTodos = [...todos]
+
+    // find index of updated todo item and replace
+    const updatedTodoIdx = newTodos.findIndex(
+      item => item.id === updatedTodo.id);
+
+    newTodos.splice(updatedTodoIdx, 1, updatedTodo);
+
+    setTodos(newTodos);
+  }
 
   return (
     <>
@@ -25,7 +43,7 @@ function App() {
           onChange={(e) => setLabel(e.target.value)}
           placeholder="Buy groceries"
         />
-        <button onClick={() => apiClient.addTodo(label)}>Add ToDo</button>
+        <button onClick={onAddItemClick}>Add ToDo</button>
       </div>
 
       {todos.map((todo) => (
@@ -35,7 +53,7 @@ function App() {
           >
             {todo.label}
           </label>
-          <button onClick={() => apiClient.toggleDone(todo.label)}>
+          <button onClick={() => onMarkDoneClick(todo.id)}>
             Mark {todo.done ? 'Undone' : 'Done'}
           </button>
         </div>
