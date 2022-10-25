@@ -41,18 +41,32 @@ app.put('/todo/index/:id', async (req: Request, res: Response) => {
     let result = await client.query('SELECT * from todo');
 
     // find existing row
-    const itemIdx = result.rows.findIndex(item => item.id === parseInt(req.params.id));
+    result = await client.query('SELECT * from todo WHERE id = $1', [req.params.id]);
 
-    // splice and reorder
-    const [row] = result.rows.splice(itemIdx, 1);
+    const move = result.rows[0];
 
-    result.rows.splice(req.body.index, 0, row);
+    if (move === undefined) {
+      throw new Error("Requested item does not exist.")
+    }
 
-    const query = result.rows.map((r, idx) => `UPDATE todo SET item_index = ${idx} WHERE id = ${r.id};`);
+    // open space at destination index
+    if (move.item_index < req.body.index) {
+      result = await client.query(
+        `UPDATE todo SET item_index = item_index - 1 WHERE item_index > $1 AND item_index <= $2`,
+        [move.item_index, req.body.index]);
 
-    await client.query(
-      query.join("")
+    } else if (move.item_index > req.body.index) {
+      result = await client.query(
+        `UPDATE todo SET item_index = item_index + 1 WHERE item_index < $1 AND item_index >= $2`,
+        [move.item_index, req.body.index]);
+    }
+
+    // update item index for moved row
+    result = await client.query(
+      'UPDATE todo SET item_index = $1 WHERE id = $2 RETURNING *',
+      [req.body.index, move.id]
     );
+
     await client.query('COMMIT');
     res.send(result.rows);
   } catch (e) {

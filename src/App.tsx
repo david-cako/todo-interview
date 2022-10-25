@@ -19,9 +19,10 @@ function App() {
       .catch(console.error);
   }, []);
 
-  const onAddItemClick = async () => {
+  const onAddItem = async () => {
     const newTodo = await apiClient.addTodo(label);
     setTodos([...todos, newTodo]);
+    setLabel("");
   }
 
   const onMarkDoneClick = async (todoId: number) => {
@@ -42,28 +43,30 @@ function App() {
 
     let newIdx;
 
-    const items = document.querySelectorAll(".todo-item");
+    const items = document.querySelectorAll(`.todo-item:not([data-item-id="${todo.id}"])`);
 
     // find new item index
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
 
-      const itemId = item.getAttribute("data-item-id");
-
-      // exclude currently dragged item
-      if (itemId !== null && todo.id === parseInt(itemId)) {
-        continue;
-      }
-
+      // find hovered item by page position
       const rect = item.getBoundingClientRect();
-      if (y <= rect.bottom) {
+      const itemAbsBottom = rect.bottom + window.scrollY;
+
+      if (y <= itemAbsBottom) {
         newIdx = i;
         break;
+      } else if (i === items.length - 1 && y > itemAbsBottom) {
+        // item is dragged past bottom of list
+        newIdx = i + 1;
       }
     }
 
     if (newIdx !== undefined) {
-      const updatedTodos = await apiClient.updateIndex(todo.id, newIdx)
+      await apiClient.updateIndex(todo.id, newIdx + 1);
+
+      const updatedTodos = await apiClient.getToDos();
+
       setTodos(updatedTodos);
     }
   }
@@ -77,7 +80,7 @@ function App() {
 
       <AddTodo label={label}
         onLabelChange={setLabel}
-        onAddItemClick={onAddItemClick}
+        onAddItem={onAddItem}
       />
 
       {todos.map((todo) => (
