@@ -1,22 +1,27 @@
 interface AddTodoProps {
     label: string;
     onLabelChange: (label: string) => any;
-    onAddItemClick: () => any;
+    onAddItem: () => any;
 }
 
 export default function AddTodo({
     label,
     onLabelChange,
-    onAddItemClick
+    onAddItem
 }: AddTodoProps) {
     return (
-        <div className="add-todo-container">
+        <form className="add-todo-container"
+            onSubmit={(e) => {
+                e.preventDefault();
+                onAddItem();
+            }}
+        >
             <input
                 value={label}
                 onChange={(e) => onLabelChange(e.target.value)}
                 placeholder="Buy groceries"
             />
-            <button onClick={onAddItemClick}>Add ToDo</button>
-        </div>
+            <button type="submit">Add ToDo</button>
+        </form>
     )
 }
