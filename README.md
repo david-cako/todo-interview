@@ -64,9 +64,9 @@ The server that acts as an intermediary between the front end and the database.
 
 (your responses to the questions in the instructions should go here):
 
-1.
-2.
-3.
+1. My solution changes the useEffect for `apiClient.getToDos()` to only run once, so that when the user marks/unmarks ToDos, it only updates that item.  
+2. The Mark Done button was calling `apiClient.toggleDone()` with `todo.label` instead of `todo.id`.  The back end crashes because it is passing a string into a query where it's expecting an integer.  This bug could have been more noticeable and recoverable by doing server-side input validation on the route to ensure that the URL parameters are the type we expect.
+3. I enabled draggable reordering that persists on the back end with `apiClient.updateIndex()`.  To avoid repeated splice logic on the front and back end, a reorder is followed by a full request of `apiClient.getToDos()`.  Postgres is plenty fast enough for this use case, even with large amounts of items.  If the queries became too long, we could splice the moved item on the front-end after a successful `updateIndex()`.
 
 ## Submitting
 
