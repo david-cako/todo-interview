@@ -5,7 +5,7 @@ interface TodoItemProps {
     todo: ToDo;
     onMarkDoneClick: (id: number) => any;
     onDragStart: () => any;
-    onMove: (todo: ToDo, coords: { y: number }) => any;
+    onMove: (todo: ToDo, coords: { y: number }) => Promise<any>;
 }
 
 export default function TodoItem({
@@ -25,27 +25,28 @@ export default function TodoItem({
     }, [])
 
     const onMouseMove = (e: MouseEvent) => {
-        setYCoord(e.clientY);
+        setYCoord(e.pageY);
     }
 
     const onMouseDown = (e: React.MouseEvent) => {
         if (e.target instanceof Element && e.target.tagName !== "BUTTON") {
             setIsDragging(true);
 
-            setYCoord(e.clientY);
+            setYCoord(e.pageY);
 
             onDragStart();
             document.addEventListener("mousemove", onMouseMove);
         }
     }
 
-    const onMouseUp = (e: React.MouseEvent) => {
+    const onMouseUp = async (e: React.MouseEvent) => {
         if (isDragging) {
-            setIsDragging(false);
-
-            onMove(todo, { y: e.clientY });
-
             document.removeEventListener("mousemove", onMouseMove);
+
+            // await move request to prevent double render
+            await onMove(todo, { y: e.pageY });
+
+            setIsDragging(false);
         }
     }
 
